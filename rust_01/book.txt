@@ -1,0 +1,6 @@
+﻿Rust is a systems programming language focused on safety, speed, and concurrency.
+Rust allows developers to write fast and memory-safe programs without a garbage collector.
+The Rust community is known for friendliness and great documentation.
+Learning Rust can be challenging at first, but the language rewards you with powerful control over memory and performance.
+Many developers enjoy Rust because it helps prevent common bugs such as null pointer errors, data races, and buffer overflows.
+Rust is increasingly used in web development, embedded systems, game engines, cryptography, and cloud services.
