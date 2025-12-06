@@ -30,9 +30,11 @@ struct Args {
 
 fn parse_offset(s: &str) -> io::Result<u64> {
     if let Some(hex) = s.strip_prefix("0x") {
-        u64::from_str_radix(hex, 16).map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "Invalid hex offset"))
+        u64::from_str_radix(hex, 16)
+            .map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "Invalid hex offset"))
     } else {
-        s.parse::<u64>().map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "Invalid decimal offset"))
+        s.parse::<u64>()
+            .map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "Invalid decimal offset"))
     }
 }
 
@@ -69,7 +71,12 @@ fn write_mode(path: &Path, offset: u64, hex_str: &str) -> io::Result<()> {
     // Convert hex string → bytes
     let bytes = hex_to_bytes(hex_str)?;
 
-    let mut file = File::options().read(true).write(true).create(true).open(path)?;
+    let mut file = File::options()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(path)?;
     file.seek(SeekFrom::Start(offset))?;
 
     file.write_all(&bytes)?;
@@ -86,8 +93,11 @@ fn write_mode(path: &Path, offset: u64, hex_str: &str) -> io::Result<()> {
 }
 
 fn hex_to_bytes(s: &str) -> io::Result<Vec<u8>> {
-    if s.len() % 2 != 0 {
-        return Err(io::Error::new(io::ErrorKind::InvalidInput, "Hex string length must be even"));
+    if !s.len().is_multiple_of(2) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Hex string length must be even",
+        ));
     }
     let mut bytes = Vec::new();
     for i in (0..s.len()).step_by(2) {
