@@ -3,12 +3,14 @@ use rand::Rng;
 use std::fmt::Write as FmtWrite;
 use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
-use std::str::FromStr;
 use std::time::Duration;
 
 ///  Diffie-Hellman key generation
 #[derive(Parser, Debug)]
-#[command(name = "streamchat", about = "Stream cipher chat with Diffie-Hellman key generation")]
+#[command(
+    name = "streamchat",
+    about = "Stream cipher chat with Diffie-Hellman key generation"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -16,21 +18,16 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    Server {
-        port: u16,
-    },
-    Client {
-        
-        addr: String,
-    },
+    Server { port: u16 },
+    Client { addr: String },
 }
 
-// Diffie–Hellman parameters 
+// Diffie–Hellman parameters
 
 const P: u64 = 0xD87FA3E291B4C7F3; // 64-bit prime (public)
-const G: u64 = 2;                   // generator (public)
+const G: u64 = 2; // generator (public)
 
-//  Keystream (LCG) 
+//  Keystream (LCG)
 
 struct Keystream {
     state: u32,
@@ -50,7 +47,7 @@ impl Keystream {
     }
 
     fn next_byte(&mut self) -> u8 {
-        (self.next_u32() >> 24) as u8 
+        (self.next_u32() >> 24) as u8
     }
 
     fn xor_bytes(&mut self, data: &[u8]) -> Vec<u8> {
@@ -66,7 +63,7 @@ impl Keystream {
     }
 }
 
-//Utilitaires 
+//Utilitaires
 
 fn hex_u64(v: u64) -> String {
     format!("{:016X}", v)
@@ -97,7 +94,7 @@ fn read_line(prompt: &str) -> io::Result<String> {
     Ok(input)
 }
 
-fn pow_mod(mut base: u64, mut exp: u64, modulus: u64) -> u64 {
+fn pow_mod(base: u64, mut exp: u64, modulus: u64) -> u64 {
     let mut result: u128 = 1;
     let mut b: u128 = (base % modulus) as u128;
     let m: u128 = modulus as u128;
@@ -154,7 +151,7 @@ fn recv_encrypted(stream: &mut TcpStream, ks: &mut Keystream) -> io::Result<Vec<
     Ok(plain)
 }
 
-//Serveur 
+//Serveur
 
 fn run_server(port: u16) -> io::Result<()> {
     println!("[SERVER] Listening on 0.0.0.0:{port}");
@@ -172,14 +169,17 @@ fn run_server(port: u16) -> io::Result<()> {
     let mut rng = rand::thread_rng();
     let private_key: u64 = loop {
         let k: u64 = rng.r#gen();
-        if k % P != 0 {
+        if !k.is_multiple_of(P) {
             break k;
         }
     };
     let public_key = pow_mod(G, private_key, P);
 
     println!("[DH] Our private key  = {}", hex_u64(private_key));
-    println!("[DH] Our public  key  = g^private mod p = {}", hex_u64(public_key));
+    println!(
+        "[DH] Our public  key  = g^private mod p = {}",
+        hex_u64(public_key)
+    );
 
     println!("[NETWORK] Sending our public key (8 bytes)...");
     send_u64(&mut stream, public_key)?;
@@ -190,7 +190,12 @@ fn run_server(port: u16) -> io::Result<()> {
     println!("\n[DH] Computing shared secret...");
     println!("Formula: secret = (their_public)^our_private mod p");
     let secret = pow_mod(their_public, private_key, P);
-    println!("secret = ({})^({}) mod p = {}", hex_u64(their_public), hex_u64(private_key), hex_u64(secret));
+    println!(
+        "secret = ({})^({}) mod p = {}",
+        hex_u64(their_public),
+        hex_u64(private_key),
+        hex_u64(secret)
+    );
 
     println!("\n[VERIFY] Shared secret computed.");
     let mut ks = Keystream::from_secret(secret);
@@ -214,7 +219,7 @@ fn run_server(port: u16) -> io::Result<()> {
     Ok(())
 }
 
-//  Client 
+//  Client
 
 fn run_client(addr: &str) -> io::Result<()> {
     println!("[CLIENT] Connecting to {addr}...");
@@ -231,14 +236,17 @@ fn run_client(addr: &str) -> io::Result<()> {
     let mut rng = rand::thread_rng();
     let private_key: u64 = loop {
         let k: u64 = rng.r#gen();
-        if k % P != 0 {
+        if !k.is_multiple_of(P) {
             break k;
         }
     };
     let public_key = pow_mod(G, private_key, P);
 
     println!("[DH] Our private key  = {}", hex_u64(private_key));
-    println!("[DH] Our public  key  = g^private mod p = {}", hex_u64(public_key));
+    println!(
+        "[DH] Our public  key  = g^private mod p = {}",
+        hex_u64(public_key)
+    );
 
     println!("[NETWORK] Waiting for server public key (8 bytes)...");
     let their_public = recv_u64(&mut stream)?;
@@ -250,7 +258,12 @@ fn run_client(addr: &str) -> io::Result<()> {
     println!("\n[DH] Computing shared secret...");
     println!("Formula: secret = (their_public)^our_private mod p");
     let secret = pow_mod(their_public, private_key, P);
-    println!("secret = ({})^({}) mod p = {}", hex_u64(their_public), hex_u64(private_key), hex_u64(secret));
+    println!(
+        "secret = ({})^({}) mod p = {}",
+        hex_u64(their_public),
+        hex_u64(private_key),
+        hex_u64(secret)
+    );
 
     println!("\n[VERIFY] Shared secret computed.");
     let mut ks = Keystream::from_secret(secret);
@@ -274,7 +287,7 @@ fn run_client(addr: &str) -> io::Result<()> {
     Ok(())
 }
 
-//  main 
+//  main
 
 fn main() -> io::Result<()> {
     let cli = Cli::parse();
