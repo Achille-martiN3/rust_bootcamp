@@ -8,19 +8,15 @@ use clap::Parser;
     disable_help_subcommand = true
 )]
 struct Cli {
-    /// Name to greet
     #[arg(value_name = "NAME", default_value = "World")]
     name: String,
 
-    /// Convert to uppercase
     #[arg(long)]
     upper: bool,
 
-    /// Repeat greeting N times
     #[arg(long, default_value_t = 1, value_name = "N")]
     repeat: u32,
 
-    /// Custom help flag
     #[arg(short = 'h', long = "help")]
     help: bool,
 }
@@ -33,14 +29,15 @@ fn main() {
         return;
     }
 
-    let mut name = cli.name;
+    let name = cli.name;
+    let mut output = format!("Hello, {}!", name);
 
     if cli.upper {
-        name = name.to_uppercase();
+        output = output.to_uppercase();
     }
 
     for _ in 0..cli.repeat {
-        println!("Hello, {}!", name);
+        println!("{}", output);
     }
 }
 
