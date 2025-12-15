@@ -5,7 +5,7 @@ use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::time::Duration;
 
-///  Diffie-Hellman key generation
+///  Diffie-Hellman clé de génération 
 #[derive(Parser, Debug)]
 #[command(
     name = "streamchat",
@@ -25,7 +25,7 @@ enum Commands {
 // Diffie–Hellman parameters
 
 const P: u64 = 0xD87FA3E291B4C7F3; // 64-bit prime (public)
-const G: u64 = 2; // generator (public)
+const G: u64 = 2; // generateur (public)
 
 //  Keystream (LCG)
 
