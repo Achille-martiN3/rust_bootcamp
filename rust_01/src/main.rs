@@ -46,7 +46,7 @@ fn main() {
     for word in words {
         // Enlever la ponctuation au début et à la fin du mot
         let cleaned = word.trim_matches(|c: char| !c.is_alphanumeric());
-        
+
         if cleaned.len() >= args.min_length {
             *freq.entry(cleaned.to_string()).or_insert(0) += 1;
         }

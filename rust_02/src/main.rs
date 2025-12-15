@@ -3,27 +3,21 @@ use std::fs::File;
 use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::path::Path;
 
-/// HexTool – Read & Write binary files in hexadecimal
 #[derive(Parser, Debug)]
 #[command(name = "hextool", about = "Read and write binary files in hex")]
 struct Args {
-    /// Target file
     #[arg(short = 'f', long)]
     file: String,
 
-    /// Read mode: display bytes as hex dump
     #[arg(short = 'r', long)]
     read: bool,
 
-    /// Write mode: hex string to write
     #[arg(short = 'w', long)]
     write: Option<String>,
 
-    /// Offset in bytes (decimal or 0x hex)
     #[arg(short = 'o', long, default_value = "0")]
     offset: String,
 
-    /// Number of bytes to read
     #[arg(short = 's', long, default_value_t = 16)]
     size: usize,
 }
