@@ -5,7 +5,7 @@ use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::time::Duration;
 
-///  Diffie-Hellman clé de génération 
+///  Diffie-Hellman clé de génération
 #[derive(Parser, Debug)]
 #[command(
     name = "streamchat",
@@ -155,6 +155,9 @@ fn recv_encrypted(stream: &mut TcpStream, ks: &mut Keystream) -> io::Result<Vec<
 
 fn run_server(port: u16) -> io::Result<()> {
     println!("[SERVER] Listening on 0.0.0.0:{port}");
+    println!("[DH] Using hardcoded parameters:");
+    println!("p = {}", hex_u64(P));
+    println!("g = {}", G);
     let listener = TcpListener::bind(("0.0.0.0", port))?;
     let (mut stream, addr) = listener.accept()?;
     println!("[SERVER] Client connected from {addr}");
@@ -162,9 +165,6 @@ fn run_server(port: u16) -> io::Result<()> {
     stream.set_read_timeout(Some(Duration::from_secs(120)))?;
 
     println!("\n[DH] Starting key exchange...");
-    println!("[DH] Using hardcoded parameters:");
-    println!("p = {}", hex_u64(P));
-    println!("g = {}", G);
 
     let mut rng = rand::thread_rng();
     let private_key: u64 = loop {

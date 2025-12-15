@@ -29,12 +29,13 @@ fn main() {
         return;
     }
 
-    let name = cli.name;
-    let mut output = format!("Hello, {}!", name);
-
-    if cli.upper {
-        output = output.to_uppercase();
-    }
+    let name = if cli.upper {
+        cli.name.to_uppercase()
+    } else {
+        cli.name
+    };
+    let greeting = if cli.upper { "HELLO" } else { "Hello" };
+    let output = format!("{}, {}!", greeting, name);
 
     for _ in 0..cli.repeat {
         println!("{}", output);

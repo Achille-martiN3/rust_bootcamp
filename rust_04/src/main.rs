@@ -1,7 +1,7 @@
+use clap::Parser;
 use colored::*;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
-use std::env;
 use std::fs;
 use std::time::Duration;
 
@@ -222,21 +222,36 @@ fn animate(grid: &[Vec<u32>]) {
     }
 }
 
+// CLI DEFINITION
+
+#[derive(Parser, Debug)]
+#[command(name = "hexgrid", about = "Hex Grid Pathfinding Tool")]
+struct Cli {
+    /// Input map file to analyze
+    #[arg(value_name = "FILE")]
+    file: Option<String>,
+
+    /// Generate a map with dimensions WxH (e.g., 5x5)
+    #[arg(long, value_name = "WxH")]
+    generate: Option<String>,
+
+    /// Output file for generated map
+    #[arg(long, value_name = "FILE")]
+    output: Option<String>,
+}
+
 // MAIN
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let cli = Cli::parse();
 
     // CASE 1 : GENERATION
-    if args.contains(&"--generate".to_string()) {
-        let i = args.iter().position(|a| a == "--generate").unwrap();
-        let dims = parse_dimensions(&args[i + 1]);
+    if let Some(dims_str) = cli.generate {
+        let dims = parse_dimensions(&dims_str);
         let grid = generate_map(dims.0, dims.1);
 
-        if args.contains(&"--output".to_string()) {
-            let j = args.iter().position(|a| a == "--output").unwrap();
-            let out = &args[j + 1];
-            save_map(&grid, out);
+        if let Some(out) = cli.output {
+            save_map(&grid, &out);
         } else {
             println!("(pas d'output fourni)");
         }
@@ -244,8 +259,8 @@ fn main() {
     }
 
     // CASE 2 : ANALYSE MAP
-    if args.len() >= 2 && args[1].ends_with(".txt") {
-        let grid = load_map(&args[1]);
+    if let Some(file) = cli.file {
+        let grid = load_map(&file);
 
         println!("Analyzing hexadecimal grid...");
         println!("Grid size: {}x{}", grid[0].len(), grid.len());

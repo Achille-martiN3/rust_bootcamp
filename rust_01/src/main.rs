@@ -44,8 +44,13 @@ fn main() {
 
     // 4) Compter avec entry() API (ownership + borrow mutable)
     for word in words {
-        // Enlever la ponctuation au début et à la fin du mot
+        // Enlever la ponctuation au début et à la fin du mot (y compris '...')
         let cleaned = word.trim_matches(|c: char| !c.is_alphanumeric());
+
+        // Skip empty strings after cleaning
+        if cleaned.is_empty() {
+            continue;
+        }
 
         if cleaned.len() >= args.min_length {
             *freq.entry(cleaned.to_string()).or_insert(0) += 1;
