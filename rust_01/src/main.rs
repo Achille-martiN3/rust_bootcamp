@@ -6,18 +6,14 @@ use std::io::{self, Read};
 #[derive(Parser, Debug)]
 #[command(name = "wordfreq")]
 struct Args {
-    /// Text to analyze (optional). If omitted, reads from stdin.
     text: Option<String>,
 
-    /// Show top N words
     #[arg(long, default_value_t = 10)]
     top: usize,
 
-    /// Ignore words shorter than N
     #[arg(long, default_value_t = 1)]
     min_length: usize,
 
-    /// Case insensitive counting
     #[arg(long)]
     ignore_case: bool,
 }
@@ -48,8 +44,11 @@ fn main() {
 
     // 4) Compter avec entry() API (ownership + borrow mutable)
     for word in words {
-        if word.len() >= args.min_length {
-            *freq.entry(word.to_string()).or_insert(0) += 1;
+        // Enlever la ponctuation au début et à la fin du mot
+        let cleaned = word.trim_matches(|c: char| !c.is_alphanumeric());
+        
+        if cleaned.len() >= args.min_length {
+            *freq.entry(cleaned.to_string()).or_insert(0) += 1;
         }
     }
 
